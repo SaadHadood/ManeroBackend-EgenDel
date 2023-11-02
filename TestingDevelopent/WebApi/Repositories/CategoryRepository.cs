@@ -41,20 +41,16 @@ public class CategoryRepository : Repo<Category, ProductContext>, ICategoryRepos
 
     public async Task<List<Product>> GetProductsByCategoryIdAsync(int categoryId)
     {
-        var category = await GetCategoryByIdAsync(categoryId);
+        var productEntities = await _context.Products.Where(p => p.CategoryId == categoryId).ToListAsync();
 
-        if (category == null)
+        var products = productEntities.Select(pe => new Product
         {
-            return new List<Product>();
-        }
+            ArticleNumber = pe.ArticleNumber,
+            Name = pe.Name,
 
-        var products = category.Products.ToList();
+        }).ToList();
 
         return products;
     }
-
-
-
-
 
 }
