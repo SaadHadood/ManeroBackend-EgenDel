@@ -30,6 +30,12 @@ namespace WebApi.Controllers
 
                 var requset = new ServiceRequest<ProductSchema> { Content = schema };
                 var response = await _productService.CreateAsync(requset);
+
+                if (response.StatusCode == Enums.StatusCode.Conflict)
+                {
+                    return Conflict();
+                }
+
                 return StatusCode((int)response.StatusCode, response);
             }
             catch (Exception ex)

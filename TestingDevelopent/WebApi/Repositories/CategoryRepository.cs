@@ -47,7 +47,11 @@ public class CategoryRepository : Repo<Category, ProductContext>, ICategoryRepos
         {
             ArticleNumber = pe.ArticleNumber,
             Name = pe.Name,
-
+            Price = pe.Price,
+            Description = pe.Description,
+            ImageUrl = pe.ImageUrl,
+            SupplierArticleNumber = pe.SupplierArticleNumber
+           
         }).ToList();
 
         return products;
