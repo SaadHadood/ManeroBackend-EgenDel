@@ -137,5 +137,52 @@ namespace WebApi.Controllers
 
 
 
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProductAndCategory(string term)
+        {
+            try
+            {
+                var response = await _productService.Search(term);
+                return StatusCode((int)response.StatusCode, response);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                return Problem();
+            }
+        }
+
+
+        [HttpGet("searchByName")]
+        public async Task<IActionResult> FilterProductsByName([FromQuery] string name)
+        {
+            try
+            {
+                var filteredProducts = await _productService.Search(name); // Set minPrice and maxPrice to 0
+                return StatusCode((int)filteredProducts.StatusCode, filteredProducts);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                return Problem();
+            }
+        }
+
+
+        [HttpGet("searchByPrice")]
+        public async Task<IActionResult> FilterProductsByPrice([FromQuery] decimal minPrice, [FromQuery] decimal maxPrice)
+        {
+            try
+            {
+                var response = await _productService.FilterProductsByPriceAsync(minPrice, maxPrice);
+                return StatusCode((int)response.StatusCode, response);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                return Problem();
+            }
+        }
+
     }
 }

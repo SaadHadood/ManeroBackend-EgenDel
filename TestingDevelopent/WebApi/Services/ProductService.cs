@@ -14,6 +14,9 @@ public interface IProductService
     Task<ServiceResponse<Product>> UpdateAsync(int id, ProductSchema productSchema);
     Task<ServiceResponse<bool>> DeleteAsync(int id);
 
+    Task<ServiceResponse<(Product, Category)>> Search(string term);
+    Task<ServiceResponse<Product>> FilterProductsByPriceAsync(decimal minPrice, decimal maxPrice);
+
 }
 public class ProductService : IProductService
 {
@@ -217,6 +220,74 @@ public class ProductService : IProductService
             Debug.WriteLine(ex.Message);
             response.StatusCode = StatusCode.InternalServerError;
             response.Content = false;
+        }
+
+        return response;
+    }
+
+
+
+
+
+    // ٍSökar produkter och kategorier
+    public async Task<ServiceResponse<(Product, Category)>> Search(string term)
+    {
+        var response = new ServiceResponse<(Product, Category)>();
+
+        try
+        {
+            var productEntity = await _productRepository.ReadAsync(entity => entity.Name.Contains(term));
+            var categoryEntity = await _categoryRepository.ReadAsync(entity => entity.Name.Contains(term));
+
+
+            if (productEntity != null || categoryEntity != null)
+            {
+                var product = productEntity;
+                var category = categoryEntity;
+
+                response.Content = (product!, category);
+                response.StatusCode = StatusCode.Ok;
+            }
+            else
+            {
+                response.StatusCode = StatusCode.NotFound;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            response.StatusCode = StatusCode.InternalServerError;
+            response.Content = default;
+        }
+
+        return response;
+    }
+
+
+    //Filtrera produkter efter pris
+    public async Task<ServiceResponse<Product>> FilterProductsByPriceAsync(decimal minPrice, decimal maxPrice)
+    {
+        var response = new ServiceResponse<Product>();
+
+        try
+        {
+            var products = await _productRepository.SearchProductsByPriceAsync(minPrice, maxPrice);
+
+            if (products != null && products.Any())
+            {
+                response.Content = products.First(); // Assuming you want to return the first product
+                response.StatusCode = StatusCode.Ok;
+            }
+            else
+            {
+                response.StatusCode = StatusCode.NotFound;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            response.StatusCode = StatusCode.InternalServerError;
+            response.Content = null;
         }
 
         return response;

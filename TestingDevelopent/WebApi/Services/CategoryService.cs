@@ -1,6 +1,5 @@
 ﻿using ManeroProject.Models;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using WebApi.Enums;
 using WebApi.Models;
 using WebApi.Repositories;
@@ -11,6 +10,8 @@ public interface ICategoryService
 {
     Task<ServiceResponse<Category>> CreateCategoryAsync(ServiceRequest<CategorySchema> request);
     Task<ServiceResponse<List<Product>>> GetProductsByCategoryAsync(int categoryId);
+
+    Task<ServiceResponse<Category>> SearchCategoryAsync(string term);
 }
 public class CategoryService : ICategoryService
 {
@@ -48,6 +49,37 @@ public class CategoryService : ICategoryService
         {
             Debug.WriteLine(ex.Message);
             response.StatusCode = StatusCode.InternalServerError;
+        }
+
+        return response;
+    }
+
+
+
+    public async Task<ServiceResponse<Category>> SearchCategoryAsync(string term)
+    {
+        var response = new ServiceResponse<Category>();
+
+        try
+        {
+            var categoryEntity = await _categoryRepository.ReadAsync(entity => entity.Name.Contains(term));
+
+            if (categoryEntity != null)
+            {
+                var category = categoryEntity;
+                response.Content = category;
+                response.StatusCode = StatusCode.Ok;
+            }
+            else
+            {
+                response.StatusCode = StatusCode.NotFound;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            response.StatusCode = StatusCode.InternalServerError;
+            response.Content = null;
         }
 
         return response;
